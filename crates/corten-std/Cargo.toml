@@ -1,6 +1,6 @@
 [package]
 name = "corten-std"
-description = "Corten's capability-oriented prelude: DirCap, typed sinks, Secret, signed manifest"
+description = "Corten's capability-oriented prelude: DirCap, typed sinks, Secret, signed manifest, misuse-resistant crypto"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
