@@ -77,8 +77,8 @@ jobs:
           git fetch --no-tags --depth=1 origin "$base"
           python3 scripts/applicability-comparison.py
           git diff --exit-code -- docs/rust-comparison.md
-      # Every remaining CWE has a mitigation strategy, and docs/residual-cwes.md
-      # is what the assignment generates.
+      # docs/residual-cwes.md is what the ledger's strategy column generates
+      # (corten-ledger check enforces the column itself).
       - name: Residual CWE map is current
         run: python3 scripts/residual-map.py --check
       - name: Compile-fail corpus

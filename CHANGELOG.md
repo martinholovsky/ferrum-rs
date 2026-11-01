@@ -11,7 +11,7 @@ Newest first. Nothing is released yet.
 
 ### Added
 
-- Proposal for the CWEs that remain under Rust and Corten (`docs/residual-mitigation.md`): 641 remain (25 claimed E, 590 C, 26 O; 522 Base or Variant), including 17 of MITRE's 2025 Top 25 and 6 of the 2025 Top 10 KEV weaknesses. Each is assigned one of 18 mitigation strategies (`audit/residual/`); `scripts/residual-map.py` generates the per-CWE map (`docs/residual-cwes.md`) and refuses when the assignment and the ledger disagree. CI checks the map is current. Spec section 8 gains open questions 13 to 15.
+- Proposal for the CWEs that remain under Rust and Corten (`docs/residual-mitigation.md`): 641 remain (25 claimed E, 590 C, 26 O; 522 Base or Variant), including 17 of MITRE's 2025 Top 25 and 6 of the 2025 Top 10 KEV weaknesses. Each is assigned one of 18 mitigation strategies (`audit/residual/strategies.csv`) in the ledger's new `strategy` column, which `corten-ledger check` requires for every remaining CWE and refuses on a CWE safe Rust cannot write. `scripts/residual-map.py` generates the per-CWE map (`docs/residual-cwes.md`); CI checks it is current. Spec section 8 questions 13 to 15, decided 2026-11-01 (the recommendation on all three); Phase 6 tracks the work (`docs/gates/phase-6.md`).
 - Phase 5, parts 1 to 3 (`docs/gates/phase-5.md`, owner decisions 2026-10-27):
   - `cargo corten check` and `build` refuse every dependency the operator's policy (`--dep-policy` / `CORTEN_DEP_POLICY`) does not admit; its `ban` lines forbid an admitted crate's raw entry points in local code. Example: `docs/dep-policy.example`.
   - CWE-252 moved to C.

@@ -14,10 +14,11 @@ Corten is a hardened Rust profile that aims to make whole classes of security bu
 4. **Do not move a CWE between buckets without a reason in the ledger.** Bucket changes go through the ledger with the mechanism and, for disputed ids, a response to the reasons in `dispute_reasons`. The 14 ids disputed by two or more panel members (spec section 6) are decided first.
 5. **Respect the owner's decisions.** The nine questions in spec section 8 were decided on 2026-10-26 (panel position kept on all nine). Reopening one is an owner decision; ask. New open questions go in section 8 as Open, and the same rule applies to them.
 6. **Rust applicability comes from the audit.** Whether a CWE can be written in Rust, in safe Rust, or not at all is decided in `audit/applicability/`: a reviewed row with reasoning, and a program wherever the compiler decides. Change a verdict there, with its program, and run `scripts/applicability-table.py`; it writes the table, `docs/rust-applicability.md` and the counts, and refuses when a verdict, a program and the ledger's `rust_applicability` disagree. Never edit the generated files or that ledger column by hand.
-7. **Numbers come from the ledger.** Bucket totals and counts in the docs are the output of `cargo run -p corten-ledger -- totals`, pasted, never edited by hand. `corten-ledger check` must pass (it runs in CI).
-8. **Names.** The project is Corten. Crates and tools are `cargo-corten`, `corten-std` and `corten-*`. The bare `corten` crate name on crates.io belongs to someone else.
-9. **Keep the CWE notice intact.** Any copy of CWE names or identifiers keeps MITRE's copyright line and terms (`ledger/NOTICE`).
-10. **The design panel's transcript is not public.** Do not ask for it or try to reconstruct it; the spec and the ledger (including `dispute_reasons`) are the public record.
+7. **Every CWE that safe Rust can still write under Corten names a mitigation strategy.** The ledger's `strategy` column holds one of the ids in `audit/residual/strategies.csv` (spec section 8, question 15; [`docs/residual-mitigation.md`](docs/residual-mitigation.md)). `corten-ledger check` requires it on every such row and refuses it on a CWE safe Rust cannot write. After changing a strategy, or a row's bucket, status or applicability, run `scripts/residual-map.py` to regenerate `docs/residual-cwes.md`; CI fails when it is stale.
+8. **Numbers come from the ledger.** Bucket totals and counts in the docs are the output of `cargo run -p corten-ledger -- totals`, pasted, never edited by hand. `corten-ledger check` must pass (it runs in CI).
+9. **Names.** The project is Corten. Crates and tools are `cargo-corten`, `corten-std` and `corten-*`. The bare `corten` crate name on crates.io belongs to someone else.
+10. **Keep the CWE notice intact.** Any copy of CWE names or identifiers keeps MITRE's copyright line and terms (`ledger/NOTICE`).
+11. **The design panel's transcript is not public.** Do not ask for it or try to reconstruct it; the spec and the ledger (including `dispute_reasons`) are the public record.
 
 ## General working rules
 

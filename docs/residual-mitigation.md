@@ -1,6 +1,6 @@
 # Proposal: mitigating the CWEs that remain under Rust and Corten
 
-Status: **proposal, 2026-11-01. Nothing here is decided or built.** The decisions it needs are listed at the end and in spec section 8 (questions 13 to 15). Every count below comes from `scripts/residual-map.py`; the per-CWE map is [`residual-cwes.md`](residual-cwes.md).
+Status: **accepted as the plan for Phase 6, 2026-11-01** ([`gates/phase-6.md`](gates/phase-6.md) tracks what is built). The three decisions at the end were taken that day (spec section 8, questions 13 to 15). Every count below comes from `scripts/residual-map.py`; the per-CWE map is [`residual-cwes.md`](residual-cwes.md).
 
 ## What remains
 
@@ -17,11 +17,11 @@ Of these, 522 are Base or Variant weaknesses. The other 119 are Pillars, Classes
 
 **Exploitability.** 17 of MITRE's 2025 Top 25 remain: CWE-79, 89, 352, 862, 78, 94, 434, 502, 863, 20, 284, 200, 306, 918, 77, 639, 770. So do 6 of the 2025 Top 10 KEV weaknesses (those exploited in the wild): CWE-78, 306, 502, 94, 288, 79. What Corten has removed are the memory-safety and path entries (CWE-787, 22, 416, 125, 120, 476, 121, 122 are verified or need `unsafe`). What remains is injection outside the prelude's grammars, authorization, deserialization, resource limits and request forgery.
 
-**A gap in the ledger.** 610 of the 641 rows name no mechanism: most C rows say "checkable" without saying by what. This proposal gives every residual row a strategy (`audit/residual/assignment.csv`). Recording that strategy in the ledger is decision 3 below.
+**A gap in the ledger.** 610 of the 641 rows name no mechanism: most C rows say "checkable" without saying by what. This proposal gives every residual row a strategy, now recorded in the ledger's `strategy` column and enforced by `corten-ledger check` (decision 3 below).
 
 ## Strategies, in proposed order
 
-The order weighs Top 25 and KEV exposure against cost. Each strategy is one way to reduce a group; the assignment is a first pass and should be revised as each one is designed.
+The order weighs Top 25 and KEV exposure against cost. Each strategy is one way to reduce a group; the first assignment and should be revised as each one is designed.
 
 | # | Strategy | CWEs | Top 25 | KEV | Effect |
 | ---: | --- | ---: | --- | --- | --- |
@@ -187,7 +187,7 @@ As AGENTS.md requires for any claim:
 
 A strategy that only strengthens C moves no bucket. It records its mechanism in the ledger (decision 3), so "checkable" names what checks it.
 
-## Decisions for the owner
+## Decisions (owner, 2026-11-01: the recommendation on all three)
 
 1. **Prelude cryptography, randomness and TLS (strategies 7 and 10).** These add dependencies to `corten-std` and to the trusted base.
    - (a) Adopt audited crates behind a minimal prelude API, after the licence and supply-chain review Phase 5 used. **Recommended:** these are the largest groups with an E candidate, and hand-written cryptography is worse.
@@ -196,7 +196,7 @@ A strategy that only strengthens C moves no bucket. It records its mechanism in 
    - (a) Prototype on the corpus first, and adopt only if the false-rejection rate stays at 0 and the API composes with an admitted web framework. **Recommended:** highest Top 25 and KEV payoff, but the most design risk.
    - (b) Document authorization as assurance-only (strategy 17).
 3. **A mechanism for every C row.**
-   - (a) Add `strategy` to the ledger, checked by `corten-ledger check`, with `audit/residual/assignment.csv` as its source. **Recommended:** it closes the 610-row gap and makes "checkable" mean something.
-   - (b) Keep the assignment as an audit file only.
+   - (a) Add `strategy` to the ledger, checked by `corten-ledger check`. **Chosen.** The first assignment moved into the ledger, which is now its only source. it closes the 610-row gap and makes "checkable" mean something.
+   - (b) Keep a separate assignment file as an audit record only.
 
 Strategies 1, 3 and 4 need no new decision: 1 waits on the reviewer, and 3 and 4 are already in spec section 5.
