@@ -18,7 +18,7 @@ A strategy that only strengthens C moves no bucket.
 | 2 | 15 lints; 9 labels on errors, logs and debug output | lints **done** (2026-11-01, below); labels not started | |
 | 3 | 4 budgets and timeouts; 3 safe deserialization and `ConfigCap`; 8 DirCap extensions | not started | |
 | 4 | 2 authorization and authentication proof types: prototype, adopt only at 0 false rejections (question 14) | not started | |
-| 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | licence and supply-chain review **done**; crates chosen (owner, 2026-11-01, below); nothing built | The build measurements in the container |
+| 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | licence and supply-chain review **done**; crates chosen (owner, 2026-11-01, below); build measurements pass on Linux; nothing built | |
 | 6 | 6 web types; 11 credentials; 12 strict parsers; 13 contracts; 5 runtime; 14 supply chain | not started | |
 | — | 1 the independent encoder review (25 rows) | blocked | The owner naming a reviewer (AGENTS.md rule 1: not the encoders' author; the AI pre-review is not the review of record) |
 | — | 16 code-quality metrics; 17 assurance tooling; 18 out of scope | reported, not gated | Spec section 7 |
@@ -66,7 +66,7 @@ Question 13 asks for this review before the owner approves any crate. Nothing is
 - Each candidate set is a scratch crate (edition 2024, Rust 1.99.1) checked with the repository's own `deny.toml`: `cargo deny check advisories bans licenses sources`, cargo-deny 0.20.2, advisory database at commit `2295466` (2026-10-30).
 - "Packages" counts `[[package]]` entries in the set's `Cargo.lock`: every target platform, and the scratch crate itself.
 - Native code is counted in the downloaded sources.
-- **Not measured:** building the sets (that runs their build scripts, so it belongs in the container), `cargo corten check` admitting them on Linux, and `cargo corten build` compiling their C inside the sandbox.
+- Building the sets runs their build scripts, so it was measured afterwards in the container (Build measurements, below).
 
 ### Releases and licences
 
@@ -129,4 +129,22 @@ The refusals show the gate can fail; every passing set passed all four checks.
 
 **Decision (owner, 2026-11-01):** 1(a), 2(a) and 3(a), the recommendation.
 
-**Before building:** take the three measurements listed under Method as not measured, in the container. A `cmake` build that the sandbox refuses would reopen 2(a).
+### Build measurements (Linux, 2026-11-01)
+
+The chosen set (`chacha20poly1305`, `argon2`, `getrandom`, `ed25519-compact`, `rustls` on `aws-lc-rs`, `rustls-native-certs`; 67 packages) was built as an application crate.
+- **Environment:** `docker.io/library/rust:1.99.1-slim-bookworm`, kernel 6.17.7, gcc 12.2.0, **no `cmake` installed**.
+- **Checker:** built from this repository at `92b947c`, with `corten-driver` from `scripts/build-driver.sh`.
+
+| Step | Result |
+| --- | --- |
+| Plain `cargo build --release` | passes. `aws-lc-sys` 0.47.0 reports `Building with: CC`: its `cc` builder, no `cmake` binary. The `cmake` crate is compiled but runs nothing |
+| `cargo corten check`, policy admitting nothing (control) | refused, exit 1 |
+| `cargo corten check`, policy admitting the six crates | **refused, exit 1**: 7 more packages need admission (`aead`, `crypto-common`, `hybrid-array`, `inout`, `rand_core`, `rustls-pki-types`, `typenum`) |
+| `cargo corten check`, policy admitting those 13 | passes |
+| `cargo corten build`, same 13 | passes inside `corten-sandbox`. The binary is built, and the provenance records `"sandboxed":true` |
+
+**What this adds to the review.**
+- **Admission is wider than the direct dependencies.** Layer 3 counts the packages an admitted crate re-exports as reachable (`crates/cargo-corten/src/deps.rs`), so an operator admitting these crates directly admits 13.
+- **Wrap, never re-export.** When `corten-std` wraps them, its public API must not re-export their types, or every application using the prelude meets the same requirement.
+- **No `cmake` binary.** `cmake` is not needed on Linux x86-64, so the sandbox's system-directory grant is enough.
+- **The condition holds.** The decision's condition (a `cmake` build the sandbox refuses would reopen 2(a)) did not arise.
