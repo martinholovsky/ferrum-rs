@@ -131,7 +131,6 @@ pub enum SameSite {
 /// are dropped silently, so they are refused here.
 pub const MAX_COOKIE_LEN: usize = 4096;
 
-/// A `Set-Cookie` value: always `__Host-` prefixed, `Secure; HttpOnly`,
 /// A cookie's name: a label (spec 4.2), so it cannot be swapped with the
 /// value.
 #[derive(Debug, Clone, Copy)]
@@ -141,6 +140,7 @@ pub struct CookieName<'a>(pub &'a str);
 #[derive(Debug, Clone, Copy)]
 pub struct CookieValue<'a>(pub &'a str);
 
+/// A `Set-Cookie` value: always `__Host-` prefixed, `Secure; HttpOnly`,
 /// `Path=/`, no `Domain`, no expiry (a session cookie), and an explicit
 /// `SameSite`.
 #[derive(Debug, Clone, PartialEq, Eq)]
