@@ -11,7 +11,13 @@ publish.workspace = true
 # Every dependency is part of Corten's trusted base (docs/tcb.md). Kept to
 # crates that need no `unsafe` from us and pass deny.toml.
 [dependencies]
+# Cryptography and randomness (Phase 6, batch 5; spec section 8, question 13,
+# owner decision 2026-11-01; review in docs/gates/phase-6.md). Default
+# features off: no library-generated salts or nonces from another source.
+argon2 = { version = "0.6.0", default-features = false, features = ["alloc", "password-hash"] }
+chacha20poly1305 = { version = "0.11.0", default-features = false, features = ["alloc", "zeroize"] }
 ed25519-compact = { version = "2.6.0", default-features = false, features = ["std"] }
+getrandom = "0.4.3"
 region = "3.0.2"
 subtle = "2.6.1"
 zeroize = "1.9.1"
