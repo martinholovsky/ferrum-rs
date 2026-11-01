@@ -210,7 +210,7 @@ Optional confidentiality labels (`Public`, `Internal`, `Confidential<PrincipalSe
 
 ### 4.10 Cryptography, credentials and randomness
 
-The standard library exposes goal-oriented operations, not raw primitives: TLS 1.3 with mandatory hostname and chain validation, AEAD with managed nonces, HKDF, Argon2id, Ed25519/X25519, the OS CSPRNG, signed update verification and typed trust-store policies. There is no "skip verification" callback.
+The standard library exposes goal-oriented operations, not raw primitives: TLS 1.3 with mandatory hostname and chain validation, AEAD with managed nonces, HKDF, Argon2id, Ed25519/X25519, the OS CSPRNG, signed update verification and typed trust-store policies. There is no "skip verification" callback. Built so far (Phase 6, batch 5, 2026-11-01): AEAD with library-managed nonces, Argon2id with a cost floor, Ed25519 verification returning `Verified<T>`, and OS randomness, in `corten_std::crypto` and `corten_std::random`. TLS, HKDF and X25519 are not built yet.
 
 ```rust
 let sealed = session_key.seal_unique(plaintext, associated_data)?;

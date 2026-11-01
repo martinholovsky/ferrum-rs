@@ -31,3 +31,35 @@ ban sqlx::query_scalar takes SQL text as a string; use the prelude's sql! throug
 ban sqlx::raw_sql runs SQL text without parameters (CWE-89)
 ban postgres::Client::simple_query runs SQL text without parameters (CWE-89)
 ban postgres::Client::batch_execute runs SQL text without parameters (CWE-89)
+
+# Weak or broken primitives (CWE-327, 328): use corten_std::crypto. Paths
+# checked against md-5 0.11.0, md5 0.8.1, sha1 0.11.0, des 0.9.0 and
+# rc4 0.2.0 on 2026-11-01.
+ban-type md5::Md5 MD5 is broken (CWE-327, 328)
+ban-type md5::Context MD5 is broken (CWE-327, 328)
+ban md5::compute MD5 is broken (CWE-327, 328)
+ban-type sha1::Sha1 SHA-1 is broken for collision resistance (CWE-327, 328)
+ban-type des::Des DES has a 56-bit key (CWE-326, 327)
+ban-type des::TdesEde2 two-key triple DES (CWE-326, 327)
+ban-type des::TdesEde3 triple DES has a 64-bit block (CWE-327)
+ban-type des::TdesEee2 two-key triple DES (CWE-326, 327)
+ban-type des::TdesEee3 triple DES has a 64-bit block (CWE-327)
+ban-type rc4::Rc4 RC4 is broken (CWE-327)
+
+# Predictable or non-cryptographic generators (CWE-335, 336, 337, 338): use
+# corten_std::random. Paths checked against rand 0.10.3, rand_core 0.10.1,
+# rand_pcg 0.10.2 and rand_xorshift 0.5.0 on 2026-11-01.
+ban rand::SeedableRng::seed_from_u64 a generator seeded from a caller value is predictable (CWE-335, 336)
+ban rand::SeedableRng::from_seed a generator seeded from a caller value is predictable (CWE-335, 336)
+ban-type rand::rngs::SmallRng not a cryptographic generator (CWE-338)
+ban-type rand::rngs::Xoshiro128PlusPlus not a cryptographic generator (CWE-338)
+ban-type rand::rngs::Xoshiro256PlusPlus not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Pcg32 not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Pcg64 not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Pcg64Mcg not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Pcg64Dxsm not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Lcg64Xsh32 not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Lcg128Xsl64 not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Mcg128Xsl64 not a cryptographic generator (CWE-338)
+ban-type rand_pcg::Lcg128CmDxsm64 not a cryptographic generator (CWE-338)
+ban-type rand_xorshift::XorShiftRng not a cryptographic generator (CWE-338)

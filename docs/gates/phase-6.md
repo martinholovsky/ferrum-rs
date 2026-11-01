@@ -18,7 +18,7 @@ A strategy that only strengthens C moves no bucket.
 | 2 | 15 lints; 9 labels on errors, logs and debug output | lints **done** (2026-11-01, below); labels not started | |
 | 3 | 4 budgets and timeouts; 3 safe deserialization and `ConfigCap`; 8 DirCap extensions | not started | |
 | 4 | 2 authorization and authentication proof types: prototype, adopt only at 0 false rejections (question 14) | not started | |
-| 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | licence and supply-chain review **done**; crates chosen (owner, 2026-11-01, below); build measurements pass on Linux; nothing built | |
+| 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | strategy 10 **done** (2026-11-01, below): `corten_std::crypto`, `corten_std::random`, weak-primitive bans; strategy 7 (TLS, `NetCap`) not started | Strategy 7: owner decisions on the manifest grant, the address and DNS policy, and timeouts |
 | 6 | 6 web types; 11 credentials; 12 strict parsers; 13 contracts; 5 runtime; 14 supply chain | not started | |
 | — | 1 the independent encoder review (25 rows) | blocked | The owner naming a reviewer (AGENTS.md rule 1: not the encoders' author; the AI pre-review is not the review of record) |
 | — | 16 code-quality metrics; 17 assurance tooling; 18 out of scope | reported, not gated | Spec section 7 |
@@ -148,3 +148,44 @@ The chosen set (`chacha20poly1305`, `argon2`, `getrandom`, `ed25519-compact`, `r
 - **Wrap, never re-export.** When `corten-std` wraps them, its public API must not re-export their types, or every application using the prelude meets the same requirement.
 - **No `cmake` binary.** `cmake` is not needed on Linux x86-64, so the sandbox's system-directory grant is enough.
 - **The condition holds.** The decision's condition (a `cmake` build the sandbox refuses would reopen 2(a)) did not arise.
+
+## Batch 5, strategy 10 result (2026-11-01)
+
+`corten-std` gains two modules. No ledger row moves: the strategy strengthens C, and an E claim for prelude users needs corpus cases first (below).
+
+- **`corten_std::random`.** Randomness comes only from the operating system's generator, through `getrandom`. There is no seedable generator, and a failure is an error, never a weaker source.
+- **`corten_std::crypto`:**
+  - `AeadKey`: XChaCha20-Poly1305. The library picks a random 192-bit nonce for every message, so the caller cannot choose or reuse one. A sealed message is a format-version byte, the nonce, the ciphertext and the tag. `open` returns one opaque error for every failure, and both directions are bounded at 16 MiB.
+  - `password`: Argon2id at OWASP's recommended 19 MiB, 2 iterations, 1 lane, with a 16-byte salt (RFC 9106). `verify` refuses a stored hash below all five of OWASP's minimum configurations, and anything but Argon2id version 19. Values checked against the raw pages on 2026-11-01.
+  - `verify_signed` returns `Verified<T>`, which only a successful Ed25519 check (or `map` on another `Verified`) can produce.
+  - No dependency type appears in the public API, so an application using the prelude does not have to admit the crates (Build measurements, above).
+- **Bans.** `docs/dep-policy.example` gains 24 ban lines:
+  - MD5 (`md-5` and `md5`), SHA-1, DES and triple DES, RC4;
+  - `SeedableRng::seed_from_u64` and `from_seed`;
+  - the non-cryptographic generators in `rand`, `rand_pcg` and `rand_xorshift`.
+
+  Each path was checked against the crate's source on 2026-11-01.
+
+**Evidence.**
+- **Unit tests:** 14 of 14, including:
+  - every single-bit flip of a sealed message is refused (denominator asserted);
+  - the RFC 8032 section 7.1 test vector, checked against the RFC text;
+  - each floor line passes at its value and is refused one iteration below it.
+- **Mutations** (each control disabled in turn, tests re-run): 9 of 9 caught.
+
+  A tenth control, a 256-byte bound on stored hashes, was removed instead: no test could make it fire, because the PHC parser already holds every field in a fixed-size buffer, and the bound would have refused a valid maximum-size hash.
+- **Bans, on Linux** (`cargo corten check` with the example policy plus the 19 admitted packages):
+  - 24 of 24 fire, each with its own `use of a disallowed type` or `method` diagnostic;
+  - the same programs pass with the same admissions and no bans;
+  - a benign program passes with the bans.
+- **CI** (run 41356524543, Linux):
+  - nextest: 202 of 202 passed;
+  - corpus: 169 of 169 detected, 0 of 169 falsely rejected;
+  - hermetic smoke test: 3 of 3;
+  - `cargo deny`: passes with 23 more packages in the lockfile (56 to 79).
+- **A defect caught on the way.** The first CI run falsely rejected 83 of 169. An exported `password::meets_floor(u32, u32)` broke the driver's labelled-parameters lint, and `corten-std` must pass its own profile, so every case that uses it failed to build. The function is now private.
+
+**Not done in this batch:**
+- Corpus cases for the strategy 10 CWEs. These come before any E claim; the strategy only says "E candidate for prelude users".
+- Key derivation (HKDF) and key agreement (X25519).
+- Strategy 7.

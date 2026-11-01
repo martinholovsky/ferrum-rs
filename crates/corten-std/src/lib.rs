@@ -15,6 +15,10 @@
 //! - [`secret::Secret`]: wiped, locked, non-printable secret bytes.
 //! - [`thread::spawn`] and [`thread::Handle::join`]: threads whose panic
 //!   propagates to the joiner instead of coming back as a value.
+//! - [`crypto`] and [`random`]: authenticated encryption with
+//!   library-managed nonces, Argon2id password hashes with a cost floor,
+//!   signature checks that return [`crypto::Verified`], and operating-system
+//!   randomness only (Phase 6, batch 5).
 //!
 //! Every encoder here is part of Corten's trusted base (`docs/tcb.md`). The
 //! roadmap requires an independent review of them before any E claim that
@@ -24,6 +28,7 @@
 //! unchecked arithmetic and no banned `std` API, and the compile-fail corpus
 //! builds it as a path dependency under `cargo corten check`.
 
+pub mod crypto;
 pub mod csv;
 pub mod fs;
 pub mod html;
@@ -34,6 +39,7 @@ pub mod log;
 pub mod manifest;
 pub mod path;
 pub mod process;
+pub mod random;
 pub mod refine;
 pub mod secret;
 pub mod sql;
