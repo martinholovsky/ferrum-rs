@@ -65,7 +65,7 @@ pub enum CryptoError {
     /// A stored password hash is not a well-formed Argon2id hash.
     HashFormat,
     /// A stored password hash's cost is below the floor
-    /// ([`password::meets_floor`]).
+    /// ([`password::FLOOR`]).
     WeakHash,
     /// The password does not match the stored hash.
     Mismatch,
@@ -333,8 +333,7 @@ pub mod password {
 
     /// Whether Argon2id costs `m_cost` (KiB) and `t_cost` meet at least one
     /// of OWASP's minimum configurations ([`FLOOR`]).
-    #[must_use]
-    pub fn meets_floor(m_cost: u32, t_cost: u32) -> bool {
+    fn meets_floor(m_cost: u32, t_cost: u32) -> bool {
         FLOOR.iter().any(|&(m, t)| m_cost >= m && t_cost >= t)
     }
 
