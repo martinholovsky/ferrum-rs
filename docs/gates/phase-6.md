@@ -55,4 +55,4 @@ Each lint was checked three ways:
 2. **It fires.** One program with an instance of each weakness gave 16 errors, one per candidate, `unused_assignments` included.
 3. **It rejects no good program.** Linux, corpus run: with all 16 candidates, 169 of 169 detected and **1 of 169** falsely rejected. `unused_assignments` (CWE-563) rejected `corpus/CWE-482/good.rs`, a benign dead store, so it was dropped rather than the good program changed. With the 15 kept: **169 of 169 detected, 0 of 169 falsely rejected**. Also on Linux: `cargo-corten` tests 57 of 57, Clippy clean, hermetic smoke test 3 of 3.
 
-Not lintable this way: CWE-563 (above) and the rest of the 38 in the `lints` group, which have no lint that decides them without false rejections. They keep their strategy until a lint or a prelude change covers them.
+Not covered by this batch: CWE-563 (its lint was dropped, above), and the other CWEs in the `lints` group for which no candidate was tried. They keep their strategy until a lint or a prelude change covers them.
