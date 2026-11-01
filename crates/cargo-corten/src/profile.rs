@@ -21,6 +21,11 @@ pub const FORBIDDEN_RUSTC_LINTS: &[&str] = &[
     "unsafe_code",
     // Spec 4.7: discarding a must-use value is a compile error.
     "unused_must_use",
+    // Phase 6, strategy 15 (aids, no bucket moves): dead code (CWE-561) and
+    // a deprecated API (CWE-477). `unused_assignments` (CWE-563) was tried
+    // and dropped: it rejected corpus/CWE-482/good.rs, a benign dead store.
+    "dead_code",
+    "deprecated",
 ];
 
 /// Clippy lints set to `forbid`. Plain rustc accepts and ignores `clippy::`
@@ -36,6 +41,23 @@ pub const FORBIDDEN_CLIPPY_LINTS: &[&str] = &[
     "clippy::let_underscore_must_use",
     // Spec 4.1: no skipped destructors.
     "clippy::mem_forget",
+    // Phase 6, strategy 15 (aids, no bucket moves): operator precedence
+    // (CWE-783), exact float comparison (CWE-1077), debug and placeholder
+    // code (CWE-489), expressions that are always true or false (CWE-570,
+    // 571) and a short-circuit operator used as control flow (CWE-768).
+    "clippy::precedence",
+    "clippy::float_cmp",
+    "clippy::float_cmp_const",
+    "clippy::dbg_macro",
+    "clippy::todo",
+    "clippy::unimplemented",
+    "clippy::eq_op",
+    "clippy::absurd_extreme_comparisons",
+    "clippy::impossible_comparisons",
+    "clippy::redundant_comparisons",
+    "clippy::overly_complex_bool_expr",
+    "clippy::nonminimal_bool",
+    "clippy::short_circuit_statement",
 ];
 
 /// Corten's own lints, run by `corten-driver` in a second pass (Phase 3b

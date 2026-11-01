@@ -3,8 +3,8 @@
 `cargo corten check` builds a crate under the Corten profile, with flags and a Clippy configuration the checker supplies itself (spec section 10, layer 2). The profile is in [`src/profile.rs`](src/profile.rs):
 
 - `-C overflow-checks=on`;
-- forbidden rustc lints: `unsafe_code`, `unused_must_use`;
-- forbidden Clippy lints: `disallowed_methods`, `disallowed_types`, `arithmetic_side_effects`, `as_conversions`, `let_underscore_must_use`, `mem_forget`;
+- forbidden rustc lints: `unsafe_code`, `unused_must_use`, and since Phase 6 `dead_code` and `deprecated`;
+- forbidden Clippy lints: `disallowed_methods`, `disallowed_types`, `arithmetic_side_effects`, `as_conversions`, `let_underscore_must_use`, `mem_forget`, and since Phase 6 `precedence`, `float_cmp`, `float_cmp_const`, `dbg_macro`, `todo`, `unimplemented`, `eq_op`, `absurd_extreme_comparisons`, `impossible_comparisons`, `redundant_comparisons`, `overly_complex_bool_expr`, `nonminimal_bool`, `short_circuit_statement` (aids for the CWEs in `docs/gates/phase-6.md`; they move no bucket);
 - a Clippy configuration banning ambient filesystem, environment, process, network and clock APIs, `catch_unwind`, and the APIs that skip a destructor. This is a denylist over `std`, so it can miss an API; the closed prelude (`corten-std`) is the deny-by-default answer.
 
 "Forbidden" means `-F`: an in-source `allow` or `expect` cannot lower it (E0453). The Clippy toolchain component is required.

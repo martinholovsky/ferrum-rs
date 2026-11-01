@@ -247,6 +247,20 @@ impl Ledger {
         })
     }
 
+    /// A ledger with only the columns a test needs.
+    #[cfg(test)]
+    fn from_records_unchecked(mut records: Vec<Record>) -> Self {
+        let header = if records.is_empty() {
+            Vec::new()
+        } else {
+            records.remove(0)
+        };
+        Self {
+            header,
+            rows: records,
+        }
+    }
+
     fn column(&self, name: &'static str) -> usize {
         // from_records guarantees every required column exists.
         self.header.iter().position(|h| h == name).unwrap_or(0)
@@ -345,6 +359,46 @@ impl Ledger {
         problems
     }
 
+    /// Checks the `strategy` column (spec section 8, question 15): every CWE
+    /// that safe Rust can still write under Corten (`rust_applicability` is
+    /// `applies` and the row is not a verified E) names one of `known`, and a
+    /// CWE safe Rust cannot write names none. A verified E row may keep its
+    /// strategy, so a later demotion does not leave it without one.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`MissingColumn`] if the ledger has no `rust_applicability`
+    /// or `strategy` column.
+    pub fn check_strategies(&self, known: &[&str]) -> Result<Vec<String>, MissingColumn> {
+        let position = |name: &'static str| {
+            self.header
+                .iter()
+                .position(|h| h == name)
+                .ok_or(MissingColumn(name))
+        };
+        let (applicability, strategy) = (position("rust_applicability")?, position("strategy")?);
+        let mut problems = Vec::new();
+        for row in &self.rows {
+            let id = self.get(row, "cwe_id");
+            let value = cell(row, strategy);
+            let writable = cell(row, applicability) == "applies";
+            let verified = self.get(row, "bucket") == "E" && self.get(row, "status") == "verified";
+            if writable && !verified && value.is_empty() {
+                problems.push(format!(
+                    "{id}: safe Rust can still write it under Corten, but it names no strategy"
+                ));
+            } else if !writable && !value.is_empty() {
+                problems.push(format!(
+                    "{id}: strategy {value:?} set, but safe Rust cannot write it"
+                ));
+            }
+            if !value.is_empty() && !known.contains(&value) {
+                problems.push(format!("{id}: unknown strategy {value:?}"));
+            }
+        }
+        Ok(problems)
+    }
+
     /// Ids of rows in `bucket` whose `status` is `verified`, with their proof test.
     #[must_use]
     pub fn verified(&self) -> Vec<(&str, &str)> {
@@ -410,6 +464,11 @@ pub fn starts_like_formula(value: &str) -> bool {
             '=' | '+' | '-' | '@' | '\t' | '\r' | '\n' | '\0' | '＝' | '＋' | '－' | '＠'
         )
     })
+}
+
+/// Field `i` of `row`, or "" for a short row.
+fn cell(row: &Record, i: usize) -> &str {
+    row.get(i).map_or("", String::as_str)
 }
 
 fn add(map: &mut BTreeMap<String, usize>, key: String) {
@@ -572,6 +631,58 @@ mod tests {
             "cwe_id,name,status\nCWE-1,\"a, \"\"b\"\"\",unverified\nCWE-2,plain,verified\n"
         );
         assert!(set_status(text, &["CWE-9"], &[]).is_err());
+    }
+
+    fn strategy_ledger(rows: &[&str]) -> Ledger {
+        let text = std::iter::once("cwe_id,bucket,status,rust_applicability,strategy")
+            .chain(rows.iter().copied())
+            .collect::<Vec<_>>()
+            .join("\n");
+        Ledger::from_records_unchecked(parse_csv(&text).unwrap())
+    }
+
+    #[test]
+    fn strategy_rules() {
+        let known = ["budgets", "lints"];
+        let check = |rows: &[&str]| strategy_ledger(rows).check_strategies(&known).unwrap();
+        // A remaining row with a known strategy, a verified E row with or
+        // without one, and an unwritable row without one all pass.
+        assert_eq!(
+            check(&[
+                "CWE-1,C,unverified,applies,budgets",
+                "CWE-2,E,verified,applies,",
+                "CWE-3,E,verified,applies,lints",
+                "CWE-4,C,unverified,not-applicable,",
+            ]),
+            Vec::<String>::new()
+        );
+        assert_eq!(
+            check(&["CWE-5,C,unverified,applies,"]),
+            ["CWE-5: safe Rust can still write it under Corten, but it names no strategy"]
+        );
+        assert_eq!(
+            check(&["CWE-6,E,unverified,applies,"]).len(),
+            1,
+            "a claimed E row still remains"
+        );
+        assert_eq!(
+            check(&["CWE-7,C,unverified,unsafe-rust-only,lints"]),
+            ["CWE-7: strategy \"lints\" set, but safe Rust cannot write it"]
+        );
+        assert_eq!(
+            check(&["CWE-8,C,unverified,applies,nope"]),
+            ["CWE-8: unknown strategy \"nope\""]
+        );
+    }
+
+    #[test]
+    fn strategy_check_needs_its_columns() {
+        let records = parse_csv("cwe_id,bucket,status\nCWE-1,C,unverified\n").unwrap();
+        let ledger = Ledger::from_records_unchecked(records);
+        assert_eq!(
+            ledger.check_strategies(&[]).err(),
+            Some(MissingColumn("rust_applicability"))
+        );
     }
 
     #[test]
