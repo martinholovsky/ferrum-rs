@@ -15,7 +15,7 @@ A strategy that only strengthens C moves no bucket.
 | Batch | Strategies (proposal numbers) | Status | Blocked on |
 | --- | --- | --- | --- |
 | 1 | Decision 3: the ledger's `strategy` column, checked by `corten-ledger check` | **done** (2026-11-01, below) | |
-| 2 | 15 lints; 9 labels on errors, logs and debug output | not started | |
+| 2 | 15 lints; 9 labels on errors, logs and debug output | lints **done** (2026-11-01, below); labels not started | |
 | 3 | 4 budgets and timeouts; 3 safe deserialization and `ConfigCap`; 8 DirCap extensions | not started | |
 | 4 | 2 authorization and authentication proof types: prototype, adopt only at 0 false rejections (question 14) | not started | |
 | 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | not started | The owner approving the crates, after the licence and supply-chain review |
@@ -34,3 +34,25 @@ A strategy that only strengthens C moves no bucket.
   - removing `strategies.csv`: exit 2.
 - **Unit tests.** They cover each rule and the missing-column error.
 - **Single source.** The first assignment file (`audit/residual/assignment.csv`) was folded into the ledger and removed. `scripts/residual-map.py` now reads the ledger, and its output is unchanged apart from its header.
+
+## Batch 2, lints result (2026-11-01)
+
+15 lints added to the checker's forbidden lists (`crates/cargo-corten/src/profile.rs`). They are aids: they move no bucket and claim no elimination.
+
+| Lint | CWE |
+| --- | --- |
+| rustc `dead_code` | 561 |
+| rustc `deprecated` | 477 |
+| `clippy::precedence` | 783 |
+| `clippy::float_cmp`, `float_cmp_const` | 1077 |
+| `clippy::dbg_macro`, `todo`, `unimplemented` | 489 |
+| `clippy::eq_op`, `absurd_extreme_comparisons`, `impossible_comparisons`, `redundant_comparisons`, `overly_complex_bool_expr`, `nonminimal_bool` | 570, 571 |
+| `clippy::short_circuit_statement` | 768 |
+
+Each lint was checked three ways:
+
+1. **The name is known to Clippy 0.1.99.** A probe forbade every candidate plus a made-up name; only the made-up one was reported unknown. An unknown lint is only a warning, so a misspelled lint would be an inert control.
+2. **It fires.** One program with an instance of each weakness gave 16 errors, one per candidate, `unused_assignments` included.
+3. **It rejects no good program.** Linux, corpus run: with all 16 candidates, 169 of 169 detected and **1 of 169** falsely rejected. `unused_assignments` (CWE-563) rejected `corpus/CWE-482/good.rs`, a benign dead store, so it was dropped rather than the good program changed. With the 15 kept: **169 of 169 detected, 0 of 169 falsely rejected**. Also on Linux: `cargo-corten` tests 57 of 57, Clippy clean, hermetic smoke test 3 of 3.
+
+Not lintable this way: CWE-563 (above) and the rest of the 38 in the `lints` group, which have no lint that decides them without false rejections. They keep their strategy until a lint or a prelude change covers them.

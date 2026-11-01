@@ -167,6 +167,8 @@ The crate choices are dependency and trusted-base decisions (decision 1).
 
 ### 15 and 16. Lints and code-quality metrics (38 and 63)
 
+**Done in part (Phase 6, batch 2):** 15 lints are forbidden by the checker, 0 of 169 corpus programs falsely rejected; `unused_assignments` was dropped after it rejected one ([`gates/phase-6.md`](gates/phase-6.md)).
+
 **Proposal.** A checker-owned set of Clippy lints chosen against the corpus's false-rejection rate (AGENTS.md rule 2): `precedence`, `float_cmp`, `dbg_macro`, `todo`, `deprecated` as errors, `cognitive_complexity`, `needless_bool` and others (CWE-783, 1077, 489, 477, 561, 570, 571, 1121). Code-quality metrics (CWE-1041 to 1126, mostly architecture and style) can be reported but should not fail a build: they are not exploitable on their own.
 
 ### 17 and 18. Not mechanised (90 and 31)
