@@ -1,0 +1,19 @@
+strategy,order,title,layer,effect
+encoder-review,1,Finish the independent encoder review,1 (prelude),claimed E becomes verified E
+authz-types,2,Authorization and authentication as proof types,1 and 2 (prelude and checker),E candidate for handlers built on the prelude
+deser-config,3,Safe-deserialization profile and ConfigCap,1 (prelude),stronger C (spec section 5 P1)
+budgets,4,Mandatory resource budgets and timeouts,1 and 2 (prelude and checker),stronger C (spec section 5 P1)
+runtime,5,"Least privilege from the manifest, release attestation",4 and 5 (CI gate and sandbox),stronger C
+web,6,"Secure-by-default HTTP response, cookie, session, redirect and CSRF types",1 (prelude),stronger C
+tls-net,7,Verified-by-default TLS and network capabilities,1 and 5 (prelude and sandbox),E candidate for prelude users; C otherwise
+fs-caps,8,"DirCap extensions: temporary files, permissions, uploads, link policy",1 (prelude),stronger C
+labels,9,"Labels extended to errors, logs and debug output",1 (prelude),stronger C
+crypto,10,Misuse-resistant cryptography and randomness in the prelude,1 and 3 (prelude and dependency policy),E candidate for prelude users; C otherwise
+secrets,11,"Credentials as Secret, literal-credential lint, scanning, observable wipe",1 2 and 4,stronger C
+sinks-parsers,12,More typed sinks and strict parsers,1 (prelude),stronger C
+contracts,13,"Refinement types, typestate, lock order, supervision",1 (prelude),stronger C; most are already reduced to a panic
+supply-chain,14,"Dependency policy, vetting, advisories, vendoring",3 and 4 (dependency audit and CI gate),stronger C
+lints,15,More checker-owned lints,2 (checker),aid: lowers the odds; proves nothing
+quality,16,Code-quality metrics,2 (checker),aid; not exploitable on its own
+assurance,17,"Design, protocol and logic weaknesses: test harnesses, review, threat models",outside the language (spec section 7),not mechanised
+out-of-scope,18,"UI, hardware, other platforms, covert channels",outside the language (spec section 7),documented only

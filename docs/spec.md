@@ -369,7 +369,7 @@ Corten can enforce a wrong policy perfectly; mechanical enforcement is not evide
 
 ## 8. Open design decisions
 
-Nine questions split the panel and needed an owner decision; each one moves ids between buckets. Questions 10 to 12 arose during implementation. The spec took the position in the middle column. On 2026-10-26 the owner kept the panel position on all nine. The 14 doubly disputed ids were then decided id by id in the ledger's `bucket_reason` column (section 6).
+Nine questions split the panel and needed an owner decision; each one moves ids between buckets. Questions 10 to 12 arose during implementation; 13 to 15 come from the residual-CWE proposal (2026-11-01) and are open. The spec took the position in the middle column. On 2026-10-26 the owner kept the panel position on all nine. The 14 doubly disputed ids were then decided id by id in the ledger's `bucket_reason` column (section 6).
 
 | # | Question | Joint-spec position | Alternative (who) | Decision |
 | --- | --- | --- | --- | --- |
@@ -385,6 +385,9 @@ Nine questions split the panel and needed an owner decision; each one moves ids 
 | 10 | Custom lints need rustc internals (dylint or a rustc driver), so a pinned nightly toolchain inside the checker. Accept that? (Raised in Phase 1.) | Not covered by the joint spec | Yes: pin a nightly for the lint driver only, build what ships on stable. No: leave CWE-252, 493, 500, 607 and 683 unverified until stable Clippy can express them | Adopt the driver, with the must-use rule narrowed to functions in the checked crate (owner, 2026-10-27, after the Phase 3b trial: [`docs/gates/phase-3b.md`](gates/phase-3b.md)) |
 | 11 | The Linux sandbox (Landlock) for brokers and layer 5: the `landlock` crate brings `unicode-ident` (Unicode-3.0) in at build time. Allow that licence, or write the syscalls with `unsafe`? (Phase 3) | Not covered by the joint spec | Raw syscalls with `unsafe` in one launcher crate | Allow Unicode-3.0, use the `landlock` crate (owner, 2026-10-27) |
 | 12 | Wasm broker runtime: `wasmtime` (Cranelift JIT, 146 packages, Apache-2.0 WITH LLVM-exception) or `wasmi` (interpreter, 15 packages, MIT/Apache)? (Phase 3) | Not covered by the joint spec | `wasmtime` | `wasmi` (owner, 2026-10-27) |
+| 13 | Cryptography, randomness and TLS in the prelude ([`residual-mitigation.md`](residual-mitigation.md), strategies 7 and 10): adds dependencies to `corten-std` and the trusted base | Not covered by the joint spec | Adopt audited crates behind a minimal API after a licence and supply-chain review (recommended), or keep them out and ban weak primitives by policy only | Open (2026-11-01) |
+| 14 | Authorization and authentication as proof types (strategy 2) | Not covered by the joint spec | Prototype on the corpus and adopt only at 0 false rejections (recommended), or leave authorization to assurance | Open (2026-11-01) |
+| 15 | Record a mitigation strategy for every C row: 610 of the 641 remaining CWEs name no mechanism | Not covered by the joint spec | A ledger `strategy` column checked by `corten-ledger check` (recommended), or keep `audit/residual/assignment.csv` as an audit file only | Open (2026-11-01) |
 
 ## 9. Roadmap: making the claims true
 
