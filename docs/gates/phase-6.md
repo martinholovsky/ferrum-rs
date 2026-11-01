@@ -18,7 +18,7 @@ A strategy that only strengthens C moves no bucket.
 | 2 | 15 lints; 9 labels on errors, logs and debug output | lints **done** (2026-11-01, below); labels not started | |
 | 3 | 4 budgets and timeouts; 3 safe deserialization and `ConfigCap`; 8 DirCap extensions | not started | |
 | 4 | 2 authorization and authentication proof types: prototype, adopt only at 0 false rejections (question 14) | not started | |
-| 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | licence and supply-chain review **done** (2026-11-01, below); nothing built | The owner choosing the crates from the review |
+| 5 | 10 cryptography and randomness; 7 TLS and network capabilities (question 13) | licence and supply-chain review **done**; crates chosen (owner, 2026-11-01, below); nothing built | The build measurements in the container |
 | 6 | 6 web types; 11 credentials; 12 strict parsers; 13 contracts; 5 runtime; 14 supply chain | not started | |
 | — | 1 the independent encoder review (25 rows) | blocked | The owner naming a reviewer (AGENTS.md rule 1: not the encoders' author; the AI pre-review is not the review of record) |
 | — | 16 code-quality metrics; 17 assurance tooling; 18 out of scope | reported, not gated | Spec section 7 |
@@ -126,5 +126,7 @@ The refusals show the gate can fail; every passing set passed all four checks.
 - 1(a) keeps the prelude's own cryptography in safe, native-free code.
 - 2(a) is the only provider that passes beside it without a policy exception.
 - 3(a) needs no licence change. 3(b) can be revisited when a deployment needs roots on a host without a CA bundle.
+
+**Decision (owner, 2026-11-01):** 1(a), 2(a) and 3(a), the recommendation.
 
 **Before building:** take the three measurements listed under Method as not measured, in the container. A `cmake` build that the sandbox refuses would reopen 2(a).
